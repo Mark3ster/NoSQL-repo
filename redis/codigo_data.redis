@@ -1,0 +1,39 @@
+# Redis — Reservas de cine (5 salas + 6 reservas + holds + listas + ranking)
+
+# 1. HASHES — salas de eventos
+HSET salaEvento:1 sala 1 nombre "Avatar 3"      total_asientos 100 asientos_disponibles 100
+HSET salaEvento:2 sala 2 nombre "Oppenheimer"   total_asientos 80  asientos_disponibles 80
+HSET salaEvento:3 sala 3 nombre "Dune Part Two" total_asientos 120 asientos_disponibles 120
+HSET salaEvento:4 sala 4 nombre "Inside Out 2"  total_asientos 60  asientos_disponibles 60
+HSET salaEvento:5 sala 5 nombre "Gladiator II"  total_asientos 90  asientos_disponibles 90
+
+# 2. HASHES — reservas (+ descontar un asiento disponible)
+HSET reserva:1 user_id 12 salaEvento_id 1 asiento A5
+HINCRBY salaEvento:1 asientos_disponibles -1
+HSET reserva:2 user_id 45 salaEvento_id 1 asiento B3
+HSET reserva:3 user_id 78 salaEvento_id 2 asiento C7
+
+# 3. STRING + EX — holds temporales (300 segundos = 5 min)
+SET hold:reserva_id:1 12 EX 300
+SET hold:reserva_id:2 45 EX 300
+SET hold:reserva_id:3 78 EX 300
+
+# 4. LISTAS — confirmar reserva: DEL hold + RPUSH en historial
+DEL hold:reserva_id:1
+RPUSH user:12:reservations reserva:1
+DEL hold:reserva_id:2
+RPUSH user:45:reservations reserva:2
+
+# 5. SORTED SET — popularidad de eventos (score = nº reservas)
+ZADD events:popularity 2 "Avatar 3"
+ZADD events:popularity 1 "Oppenheimer"
+ZADD events:popularity 2 "Gladiator II"
+
+# CONSULTAS
+HGETALL salaEvento:1
+HMGET reserva:1 user_id asiento
+TTL hold:reserva_id:1
+LRANGE user:12:reservations 0 -1
+ZREVRANGE events:popularity 0 -1 WITHSCORES
+ZINCRBY events:popularity 1 "Oppenheimer"
+ZCOUNT events:popularity 2 +inf
