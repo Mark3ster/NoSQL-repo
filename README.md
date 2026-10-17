@@ -3,7 +3,7 @@
 Proyecto final de **Bases de Datos No Estructuradas** (UDIT, mayo 2026).
 Cuatro tecnologías NoSQL, cuatro modelos de datos y cuatro problemas distintos.
 
-**Autor:** _tu nombre aquí_
+**Autor:** Marcos Jiménez González
 
 | Carpeta | Tecnología | Modelo | Caso de uso |
 |---|---|---|---|
